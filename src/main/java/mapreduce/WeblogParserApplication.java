@@ -3,6 +3,7 @@ package mapreduce;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -52,13 +53,13 @@ public class WeblogParserApplication extends Configured implements Tool {
         
         
         Job job2 = Job.getInstance(new Configuration(), "weblog2");
-        job2.setMapOutputKeyClass(Text.class);
-        job2.setMapOutputValueClass(WeblogLine.class);
+        job2.setMapOutputKeyClass(IntWritable.class);
+        job2.setMapOutputValueClass(WeblogSessionSummary.class);
         job2.setOutputKeyClass(Text.class);
-        job2.setOutputValueClass(WeblogSessionSummary.class);
+        job2.setOutputValueClass(Text.class);
 
-        job2.setMapperClass(WeblogMapper.class);
-        job2.setReducerClass(WeblogReducer.class);
+        job2.setMapperClass(WeblogSessionSummaryMapper.class);
+        job2.setReducerClass(WeblogSessionSummaryReducer.class);
 
         job2.setInputFormatClass(TextInputFormat.class);
         job2.setOutputFormatClass(TextOutputFormat.class);
@@ -67,7 +68,7 @@ public class WeblogParserApplication extends Configured implements Tool {
         FileOutputFormat.setOutputPath(job2, new Path(args[1]));
 
         job2.setJarByClass(WeblogParserApplication.class);
-//        job2.waitForCompletion(true);
+        job2.waitForCompletion(true);
         return 0;
         
 	}

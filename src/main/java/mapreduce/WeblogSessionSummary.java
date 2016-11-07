@@ -3,10 +3,12 @@ package mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Comparator;
 
 import org.apache.hadoop.io.Writable;
 
-public class WeblogSessionSummary implements Writable{
+public class WeblogSessionSummary implements Writable, Comparable{
+	private String clientIP;
 	private int numberOfSessions = 0;
 	private int totalUniqueURLVisits = 0;
 	private long totalSessionTime = 0;
@@ -47,11 +49,20 @@ public class WeblogSessionSummary implements Writable{
 		this.totalSessionTime += l;
 	}
 	
+	public String getClientIP() {
+		return clientIP;
+	}
+
+	public void setClientIP(String clientIP) {
+		this.clientIP = clientIP;
+	}
+	
 	@Override
 	public void write(DataOutput out) throws IOException {
 		out.writeInt(this.getNumberOfSessions());
 		out.writeLong(this.getTotalSessionTime());
 		out.writeInt(this.getTotalUniqueURLVisits());
+		out.writeUTF(this.getClientIP());
 	}
 
 	@Override
@@ -59,6 +70,7 @@ public class WeblogSessionSummary implements Writable{
 		this.setNumberOfSessions(in.readInt());
 		this.setTotalSessionTime(in.readLong());
 		this.setTotalUniqueURLVisits(in.readInt());
+		this.setClientIP(in.readUTF());
 	}
 
 	@Override
@@ -70,5 +82,15 @@ public class WeblogSessionSummary implements Writable{
 		sb.append(" ");
 		sb.append(getTotalUniqueURLVisits());
 		return sb.toString();
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		WeblogSessionSummary a = (WeblogSessionSummary) o;
+		WeblogSessionSummary b = (WeblogSessionSummary) this;
+
+		int num1 = a.getNumberOfSessions();
+		int num2 = b.getNumberOfSessions();
+		return (num1 == num2 ? 0 : (num1 > num2 ? -1 : 1));
 	}
 }

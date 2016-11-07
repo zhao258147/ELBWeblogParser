@@ -18,6 +18,8 @@ public class WeblogReducer extends Reducer<WeblogLineCompositeKeyWritable, Weblo
 		List<String> urls = new ArrayList<String>();
 		
 		WeblogSessionSummary summary = new WeblogSessionSummary();
+		summary.setClientIP(key.getClientIP());
+		
 		long prevTimestamp = 0; 
 		
 		Iterator<WeblogLine> iter = values.iterator();
@@ -28,7 +30,7 @@ public class WeblogReducer extends Reducer<WeblogLineCompositeKeyWritable, Weblo
         		summary.incrementNumberOfSessions();
         	} else {
         		//time difference between the current request from the prev request in milli 
-        		long diff = (prevTimestamp - value.getTimestamp())/1000;
+        		long diff = (value.getTimestamp() - prevTimestamp)/1000;
 
         		//still requesting content for the previous session, so not a new session
         		boolean contentRetrival = value.getUrl().contains("wp-content") || value.getHttpMethod().equals("POST");

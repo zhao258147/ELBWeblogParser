@@ -22,6 +22,8 @@ public class WeblogSessionSummaryReducer extends Reducer<IntWritable, WeblogSess
 		PriorityQueue<WeblogSessionSummary> maxHeap = new PriorityQueue<WeblogSessionSummary>(NUM_OF_FREQUENT_USERS + 1);
 		
 		Iterator<WeblogSessionSummary> iter = values.iterator();
+		
+		//go through each visitor's session summary, save the users with the highest  
         while(iter.hasNext()){
         	WeblogSessionSummary value = iter.next();
         	
@@ -31,7 +33,7 @@ public class WeblogSessionSummaryReducer extends Reducer<IntWritable, WeblogSess
         	
         	WeblogSessionSummary summary = new WeblogSessionSummary();
         	summary.setClientIP(value.getClientIP());
-        	summary.setNumberOfSessions(value.getNumberOfSessions());
+        	summary.setTotalSessionTime(value.getTotalSessionTime());
         	
         	maxHeap.add(summary);
         	if(maxHeap.size() > NUM_OF_FREQUENT_USERS){

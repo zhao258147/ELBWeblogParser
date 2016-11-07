@@ -9,7 +9,12 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 public class WeblogReducer extends Reducer<WeblogLineCompositeKeyWritable, WeblogLine, Text, WeblogSessionSummary> {
-	public static final int SESSION_LENGTH = 900;
+	/*
+	 * using half an hour as session length
+	 * some visitors repeat some of the URLs they visit (lower avg unique url visits) after being half an hour to an hour away
+	 * indicating that they started a new session
+	 */
+	public static final int SESSION_LENGTH = 1800;
 	
 	@Override
     public void reduce(WeblogLineCompositeKeyWritable key, Iterable<WeblogLine> values, Context output)
@@ -32,16 +37,16 @@ public class WeblogReducer extends Reducer<WeblogLineCompositeKeyWritable, Weblo
         		//time difference between the current request from the prev request in milli 
         		long diff = (value.getTimestamp() - prevTimestamp)/1000;
 
-        		//still requesting content for the previous session, so not a new session
-        		boolean contentRetrival = value.getUrl().contains("wp-content") || value.getHttpMethod().equals("POST");
+        		//still requesting content for the previous session, so not a new session, but sessionize only by time window
+        		//boolean contentRetrival = value.getUrl().contains("wp-content") || value.getHttpMethod().equals("POST");
         		
-        		//if the difference if longer than 15 mintues and not requesting content, start new session
-	        	if(diff > SESSION_LENGTH && !contentRetrival){
+	        	if(diff > SESSION_LENGTH){
+	        		//if the difference if longer than 30 mintues, start new session
 	        		urls.clear();
 	        		
 	        		summary.incrementNumberOfSessions();
 	        	} else {
-	        		summary.incrementTotalSessionTime(diff);		        		
+	        		summary.incrementTotalSessionTime(diff);
 	        	}
         	}
 

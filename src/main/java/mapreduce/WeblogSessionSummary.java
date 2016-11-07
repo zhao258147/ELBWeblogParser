@@ -89,8 +89,8 @@ public class WeblogSessionSummary implements Writable, Comparable{
 		WeblogSessionSummary a = (WeblogSessionSummary) o;
 		WeblogSessionSummary b = (WeblogSessionSummary) this;
 
-		int num1 = a.getNumberOfSessions();
-		int num2 = b.getNumberOfSessions();
+		long num1 = a.getTotalSessionTime();
+		long num2 = b.getTotalSessionTime();
 		return (num1 == num2 ? 0 : (num1 > num2 ? -1 : 1));
 	}
 }

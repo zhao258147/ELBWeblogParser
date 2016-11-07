@@ -8,8 +8,11 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.log4j.Logger;
 
 public class WeblogMapper extends Mapper<Object, Text, WeblogLineCompositeKeyWritable, WeblogLine> {
+	Logger logger = Logger.getLogger(WeblogMapper.class);
+	
 	final static SimpleDateFormat dateFormat = new SimpleDateFormat(WeblogLine.DATE_FORMAT);
 	
     @Override
@@ -18,6 +21,7 @@ public class WeblogMapper extends Mapper<Object, Text, WeblogLineCompositeKeyWri
     	try{
 	    	WeblogLine line = new WeblogLine();
 	    	
+	    	//use regex to retrieve individual items from log 
 	        Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"");
 	        Matcher matcher = regex.matcher(value.toString());
 	        
@@ -31,8 +35,13 @@ public class WeblogMapper extends Mapper<Object, Text, WeblogLineCompositeKeyWri
 	        }
 	        
 	        if(matcher.find()){
+	        	/*
+	        	 * if cookie or login information can be retrieved, 
+	        	 * individual client can be a lot easier to identify  
+	        	 */
 	        	String[] clientIP = matcher.group().split(":");
 	        	line.setClientIP(clientIP[0]);
+	        	
 	        	line.setClientPort(Integer.parseInt(clientIP[1]));
 	        }
 	        
@@ -97,8 +106,10 @@ public class WeblogMapper extends Mapper<Object, Text, WeblogLineCompositeKeyWri
         	if(line.getClientIP() != null){
         		output.write(outputKey, line);
         	}
-        } catch(ParseException | NullPointerException e ){
-        	e.printStackTrace();
+        } catch(ParseException | NullPointerException | ArrayIndexOutOfBoundsException e ){
+        	//a few lines in the log cannot be parsed, skip special cases 
+        	logger.error(value.toString());
+        	logger.error(e);
         }
     }
 }
